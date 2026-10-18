@@ -6,7 +6,7 @@
 
 **Curso:** Desarrollo de Aplicaciones Móviles
 
-**Fecha:** 13 de octubre de 2026
+**Fecha:** 18 de octubre de 2026
 
 **Estado:** Primera versión Android con datos de demostración. La revisión en dispositivo está pendiente.
 
@@ -14,9 +14,9 @@
 
 Tesla Familias es una aplicación Android dirigida a padres o apoderados de la Academia Preuniversitaria Tesla. Busca reunir la información de asistencia, obligaciones económicas y avisos del estudiante en un solo lugar.
 
-El problema identificado para este proyecto es que el padre puede depender de consultas a una plataforma web o de comunicaciones institucionales para conocer novedades. La propuesta consiste en facilitar esa consulta desde el teléfono. Todavía no se ha realizado un estudio con familias que permita medir la demora de las comunicaciones ni demostrar una mejora con la aplicación.
+Para conocer las novedades de su hijo, el padre puede necesitar revisar una plataforma web o esperar una comunicación de la academia. Con esta aplicación busco facilitar la consulta desde el teléfono y reunir los datos más importantes en una misma pantalla.
 
-El proyecto se relaciona con el sistema web SIGAF con el que trabaja el autor. Para el curso se desarrollará un producto mínimo viable (MVP) con datos ficticios y funcionamiento local. La integración real con SIGAF quedará para una etapa posterior.
+Tesla Familias está relacionado con SIGAF, el sistema web en el que también estoy trabajando para la academia. En esta primera versión usaré datos ficticios guardados en el teléfono. Así podré desarrollar y probar las funciones principales antes de conectar la aplicación con el sistema real.
 
 ## Objetivos
 
@@ -30,15 +30,15 @@ Los objetivos específicos son:
 - Guardar la sesión y los cambios de la demostración.
 - Incluir un panel de prueba para modificar datos y comprobar los resultados.
 
-## Justificación de las decisiones
+## Decisiones de desarrollo
 
-La documentación de Android recomienda separar las responsabilidades de la interfaz y los datos (Android Developers, 2026c). En esta primera versión, `MainActivity.kt` contiene las pantallas y `DatosDemo.kt` guarda y consulta los registros. Esta separación básica permite que Inicio y Asistencias utilicen la misma información sin repetir los registros en cada pantalla. Todavía no se utiliza ViewModel ni una arquitectura con varias capas.
+La documentación de Android recomienda separar las responsabilidades de la interfaz y los datos (Android Developers, 2026c). En esta primera versión, `MainActivity.kt` contiene las pantallas y `DatosDemo.kt` guarda y consulta los registros. Esta separación básica permite que Inicio y Asistencias utilicen la misma información sin repetir los registros en cada pantalla. Por ahora mantengo esta organización para trabajar las pantallas y los datos por separado.
 
-La guía de la capa de datos explica la importancia de centralizar las consultas y modificaciones (Android Developers, 2026b). Para este avance se emplea una sola clase de datos con SharedPreferences y registros JSON. Se eligió esta solución por el tamaño pequeño de la demostración: un estudiante y una obligación. Si el proyecto crece, será necesario revisar el almacenamiento y considerar una base de datos.
+La guía de la capa de datos explica la importancia de centralizar las consultas y modificaciones (Android Developers, 2026b). Para guardar los datos uso SharedPreferences y registros JSON. Elegí esta opción porque la demostración solo maneja un estudiante y una obligación. Si el proyecto crece, será necesario revisar el almacenamiento y considerar una base de datos.
 
 Android permite mostrar notificaciones cuando la aplicación no está abierta (Android Developers, 2026a). El proyecto incluye avisos locales generados desde el panel de prueba. El historial se guarda dentro de la aplicación, por lo que su contenido no depende de que el aviso permanezca en la barra del teléfono. Esto no equivale a recibir avisos enviados desde la academia: esa comunicación requiere una integración remota que todavía no existe.
 
-El modo local permite presentar los flujos sin credenciales reales ni disponibilidad de SIGAF. Su limitación es que solo demuestra el funcionamiento en un dispositivo. Las fuentes utilizadas respaldan las decisiones técnicas; los beneficios para las familias deberán comprobarse posteriormente con usuarios.
+El modo local permite probar la aplicación sin una cuenta real ni conexión a SIGAF. Por ahora los cambios solo se guardan en el teléfono donde se utiliza la demostración. Más adelante será necesario trabajar la conexión con el servidor para compartir la información entre la academia y los padres.
 
 ## Alcance y avance actual
 
@@ -54,7 +54,7 @@ El modo local permite presentar los flujos sin credenciales reales ni disponibil
 | Almacenamiento | Sesión y registros guardados localmente |
 | Notificación del teléfono | Código incorporado; comprobación en dispositivo pendiente |
 
-Esta es una primera implementación. El APK de desarrollo compiló correctamente el 13 de octubre de 2026 con Java 25, Gradle 9.6 y el plugin Android 9.4.1. La revisión visual y funcional en dispositivo está pendiente. No se presentan las maquetas como capturas de la aplicación funcionando.
+Esta es una primera implementación. El APK de desarrollo compiló correctamente el 13 de octubre de 2026 con Java 25, Gradle 9.6 y el plugin Android 9.4.1. Todavía me falta revisar las pantallas y probar las funciones en un teléfono o emulador.
 
 Quedan fuera del MVP los pagos en línea, chat, calificaciones, matrícula, geolocalización, biometría y administración real de usuarios. No se usarán datos reales de estudiantes.
 
@@ -122,7 +122,7 @@ La demostración contiene un estudiante, cinco registros iniciales de asistencia
 
 ## Cómo ejecutar el avance
 
-El proyecto está escrito en Kotlin y utiliza el plugin Android 9.4.1 y Gradle 9.6. La compilación fue comprobada con Java 25. El nivel 17 configurado para el código compilado no significa que deba instalarse Java 17 para ejecutar Gradle.
+El proyecto está escrito en Kotlin y utiliza el plugin Android 9.4.1 y Gradle 9.6. La compilación se realizó con Java 25.
 
 1. Abrir la carpeta raíz en Android Studio y sincronizar Gradle.
 2. Instalar Android SDK 36, extensión 19, y Build Tools 36.0.0 si se solicitan.
@@ -141,13 +141,13 @@ El APK de desarrollo se genera en `app/build/outputs/apk/debug/app-debug.apk` si
 
 Se revisará manualmente que el acceso funcione, que un cambio de asistencia aparezca en Inicio, que editar la obligación actualice el total y que abrir un aviso reduzca los no leídos. También se comprobará que los datos permanezcan al cerrar y abrir la aplicación, que el cierre de sesión funcione y que restablecer recupere la demostración.
 
-Las notificaciones del teléfono y la apariencia se revisarán en dispositivo o emulador. Estas comprobaciones todavía no se presentan como realizadas. Para este avance no se incluye una suite de pruebas automatizadas.
+También revisaré las notificaciones y la apariencia en un teléfono o emulador. Después agregaré capturas de la aplicación y anotaré los errores que encuentre y sus correcciones.
 
 ## Registro de cambios
 
 ### Pasados — Borrador inicial
 
-Se definieron problema, plataforma, alcance, pantallas y una propuesta de arquitectura. El README anterior identificaba esta etapa como Módulo 1. No se atribuyen avances a otros módulos sin documentación disponible.
+En el primer borrador definí el problema, los objetivos, la plataforma Android y las funciones que tendrá la aplicación. También planteé las pantallas principales y el uso de datos locales para la demostración.
 
 ### Actuales — Módulo 5
 
@@ -158,23 +158,24 @@ Se definieron problema, plataforma, alcance, pantallas y una propuesta de arquit
 - Se incorporó almacenamiento local y código para notificaciones de demostración.
 - Se definieron las comprobaciones y los pendientes para la entrega final.
 
-### Futuros — Hasta Módulo 8
+### Pendientes para la versión final
 
-- **M6:** comprobar la ejecución y mejorar las pantallas con base en las maquetas.
-- **Antes de M7:** publicar código y README actualizado en GitHub Classroom, como indica la consigna.
-- **M7:** revisar persistencia y notificaciones en dispositivo; corregir errores y tomar capturas reales.
-- **M8:** entregar el MVP funcional, APK e instrucciones actualizadas según los requisitos de esa actividad.
-- **Después del curso:** evaluar integración con SIGAF y notificaciones remotas.
+- Probar los recorridos principales en un teléfono o emulador.
+- Ajustar la apariencia y la navegación de las pantallas tomando como referencia las maquetas.
+- Comprobar que la sesión y los cambios se conserven al cerrar y abrir la aplicación.
+- Revisar las notificaciones del teléfono y corregir los errores encontrados.
+- Agregar capturas reales y actualizar las instrucciones de instalación y uso.
+- Generar el APK final con las correcciones realizadas.
 
-## Entrega M5
+La conexión con SIGAF y el envío de notificaciones remotas quedan como mejoras posteriores al alcance de esta entrega.
 
-La consigna solicita una copia del README, su enlace y la publicación del borrador en GitHub Classroom. Este documento incluye el análisis y las citas para atender la rúbrica académica; no se especifica un archivo Word ni una extensión mínima en el texto proporcionado.
+## Repositorio
 
-Repositorio configurado: [Tesla Familias](https://github.com/royerchavez01/tesla-familias-android).
+[Código del proyecto](https://github.com/royerchavez01/tesla-familias-android)
 
-[Enlace previsto del README](https://github.com/royerchavez01/tesla-familias-android/blob/main/README_Tesla_Familias.md). La versión actual aparecerá allí después de publicar los cambios. Aún debe verificarse que este sea el repositorio de Classroom.
+[README del proyecto](https://github.com/royerchavez01/tesla-familias-android/blob/main/README_Tesla_Familias.md)
 
-La carpeta `wireframes` debe acompañar al README para mostrar las imágenes. La publicación de este avance está pendiente.
+Para consultar las imágenes en una copia local, la carpeta `wireframes` debe estar junto a este archivo.
 
 ## Referencias
 
