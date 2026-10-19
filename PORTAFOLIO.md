@@ -11,7 +11,7 @@ Tesla Familias permite consultar asistencias, obligaciones y avisos de un estudi
 - [Aplicación Android APK](https://raw.githubusercontent.com/royerchavez01/tesla-familias-android/main/entrega/TeslaFamilias-1.0.0.apk)
 - [Proyecto completo ZIP](https://github.com/royerchavez01/tesla-familias-android/raw/refs/heads/main/entrega/Entrega-TeslaFamilias-M8.zip)
 - [Informe](entrega/documentos/Informe-Tesla-Familias-M8.docx)
-- [Presentación de nueve diapositivas](entrega/documentos/Presentacion-Tesla-Familias-M8.pptx)
+- [Presentación de nueve diapositivas](entrega/documentos/Royer_Chavez_Tesla-Familias.pptx)
 - [Documentación e instrucciones](README_Tesla_Familias.md)
 
 ## Código QR del APK
