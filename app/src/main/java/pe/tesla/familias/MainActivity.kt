@@ -1,6 +1,7 @@
 package pe.tesla.familias
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Notification
@@ -17,6 +18,9 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
+import android.view.WindowInsets
+import android.view.inputmethod.InputMethodManager
+import android.window.OnBackInvokedDispatcher
 import android.widget.*
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -39,20 +43,65 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         datos = DatosDemo(this)
         screen = savedInstanceState?.getString("screen") ?: "Inicio"
+        pendingNotice = datos.notices().firstOrNull { it.id == savedInstanceState?.getString("pendingNotice") }
         if (intent.getBooleanExtra("openNotices", false) && savedInstanceState == null) screen = "Notificaciones"
-        if (datos.loggedIn) show(screen) else login()
+        if (datos.loggedIn) {
+            show(screen)
+            intent.removeExtra("openNotices")
+        } else login()
+        if (Build.VERSION.SDK_INT >= 33) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT) {
+                volver()
+            }
+        }
+        if (savedInstanceState != null && screen == "Administrador demo") {
+            content.findViewWithTag<EditText>("amount")?.setText(savedInstanceState.getString("amount"))
+            content.findViewWithTag<EditText>("due")?.setText(savedInstanceState.getString("due"))
+            content.findViewWithTag<Spinner>("attendance")?.setSelection(savedInstanceState.getInt("attendance"))
+            content.findViewWithTag<CheckBox>("paid")?.isChecked = savedInstanceState.getBoolean("paid")
+        }
     }
-    override fun onSaveInstanceState(outState: Bundle) { super.onSaveInstanceState(outState); outState.putString("screen", screen) }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("screen", screen)
+        outState.putString("pendingNotice", pendingNotice?.id)
+        outState.putString("amount", content.findViewWithTag<EditText>("amount")?.text?.toString())
+        outState.putString("due", content.findViewWithTag<EditText>("due")?.text?.toString())
+        outState.putInt("attendance", content.findViewWithTag<Spinner>("attendance")?.selectedItemPosition ?: 0)
+        outState.putBoolean("paid", content.findViewWithTag<CheckBox>("paid")?.isChecked ?: false)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (datos.loggedIn && intent.getBooleanExtra("openNotices", false)) {
+            show("Notificaciones")
+            intent.removeExtra("openNotices")
+        }
+    }
 
     private fun base(title: String, back: Boolean = true) {
         val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(Color.rgb(246, 248, 252)) }
         // Deja espacio para las barras del teléfono.
         root.setOnApplyWindowInsetsListener { view, insets ->
-            view.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop, insets.systemWindowInsetRight, insets.systemWindowInsetBottom)
+            if (Build.VERSION.SDK_INT >= 30) {
+                val bars = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime())
+                view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            } else {
+                @Suppress("DEPRECATION")
+                view.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop, insets.systemWindowInsetRight, insets.systemWindowInsetBottom)
+            }
             insets
         }
         val header = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
-        if (back) header.addView(Button(this).apply { text = "‹"; contentDescription = "Volver a Inicio"; setOnClickListener { show("Inicio") } }, LinearLayout.LayoutParams(dp(56), dp(52)))
+        if (back) header.addView(Button(this).apply {
+            text = "‹"
+            textSize = 28f
+            contentDescription = "Volver a Inicio"
+            setTextColor(navy)
+            backgroundTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+            setOnClickListener { show("Inicio") }
+        }, LinearLayout.LayoutParams(dp(56), dp(52)))
         header.addView(label(title, 23, true), LinearLayout.LayoutParams(0, -2, 1f))
         root.addView(header)
         val scroll = ScrollView(this).apply { isFillViewport = true }
@@ -86,7 +135,7 @@ class MainActivity : Activity() {
         }, LinearLayout.LayoutParams(-1, dp(58)).apply { bottomMargin = dp(10) })
     }
     private fun input(hint: String, type: Int = InputType.TYPE_CLASS_TEXT): EditText = EditText(this).apply {
-        this.hint = hint; inputType = type; setSingleLine(true); textSize = 17f
+        this.hint = hint; contentDescription = hint; inputType = type; setSingleLine(true); textSize = 17f
         content.addView(this, LinearLayout.LayoutParams(-1, dp(60)).apply { bottomMargin = dp(12) })
     }
     private fun toast(text: String) { Toast.makeText(this, text, Toast.LENGTH_LONG).show() }
@@ -97,6 +146,10 @@ class MainActivity : Activity() {
         screen = "Acceso"
         base("Tesla Familias", false)
         content.addView(label("Tesla", 44, true))
+        content.addView(ImageView(this).apply {
+            setImageResource(R.drawable.ic_tesla)
+            contentDescription = "Icono de Tesla Familias"
+        }, LinearLayout.LayoutParams(dp(60), dp(60)))
         content.addView(label("ACADEMIA PREUNIVERSITARIA", 13, true))
         gap()
         content.addView(label("Información de tu estudiante en un solo lugar", 22, true))
@@ -107,15 +160,21 @@ class MainActivity : Activity() {
         content.addView(error)
         button("Ingresar") {
             if (user.text.toString().trim() == "demo" && password.text.toString() == "tesla123") enter()
-            else error.text = "Usa las credenciales de prueba: demo / tesla123."
+            else error.setText(R.string.error_acceso)
         }
         button("Acceso de demostración") { enter() }
         content.addView(label("Usuario: demo · Contraseña: tesla123", 14))
         gap()
         content.addView(label("DISCIPLINA HOY, GRANDES MAÑANAS", 12, true))
     }
-    private fun enter() { datos.loggedIn = true; show("Inicio") }
+    private fun enter() {
+        datos.loggedIn = true
+        val destination = if (intent.getBooleanExtra("openNotices", false)) "Notificaciones" else "Inicio"
+        intent.removeExtra("openNotices")
+        show(destination)
+    }
     private fun show(destination: String) {
+        getSystemService(InputMethodManager::class.java).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
         if (!datos.loggedIn) { login(); return }
         screen = destination
         base(if (destination == "Inicio") "Tesla Familias" else destination, destination != "Inicio")
@@ -126,18 +185,28 @@ class MainActivity : Activity() {
             "Notificaciones" -> notices()
             "Perfil" -> profile()
             "Administrador demo" -> admin()
+            "Pruebas del dispositivo" -> content.addView(PruebasDispositivoView(this))
             else -> { screen = "Inicio"; home() }
         }
     }
     private fun home() {
         box().apply { addView(label("Juan Pérez", 25, true)); addView(label("Ciclo Preuniversitario · Estudiante ficticio", 15)) }
         box().apply { addView(label("ASISTENCIA DE HOY", 13, true)); addView(label(datos.todayStatus(), 28, true)); addView(label(LocalDate.now().format(dateFormat), 14)) }
-        button("Asistencias  ›") { show("Asistencias") }
-        button("Obligaciones  ·  ${money(if (datos.obligation().paid) 0 else datos.obligation().amount)}") { show("Obligaciones") }
-        button("Notificaciones  ·  ${datos.notices().count { !it.read }} sin leer") { show("Notificaciones") }
+        acceso("Asistencias", "Consulta el historial del estudiante") { show("Asistencias") }
+        acceso("Obligaciones", "Pendiente: ${money(if (datos.obligation().paid) 0 else datos.obligation().amount)}") { show("Obligaciones") }
+        val unread = datos.notices().count { !it.read }
+        acceso("Notificaciones", if (unread == 1) "1 aviso sin leer" else "$unread avisos sin leer") { show("Notificaciones") }
         box().apply { addView(label("Último aviso", 18, true)); addView(label(datos.notices().firstOrNull()?.title ?: "Sin avisos registrados")) }
-        button("Perfil") { show("Perfil") }
-        button("Administrador de demostración") { show("Administrador demo") }
+        acceso("Perfil", "Apoderado, estudiante y sesión") { show("Perfil") }
+        acceso("Administrador de demostración", "Cambiar datos y probar avisos") { show("Administrador demo") }
+    }
+    private fun acceso(title: String, subtitle: String, action: () -> Unit) {
+        box().apply {
+            addView(label("$title  ›", 20, true))
+            addView(label(subtitle, 14).apply { setTextColor(muted) })
+            isFocusable = true
+            setOnClickListener { action() }
+        }
     }
     private fun attendance() {
         content.addView(label("Juan Pérez · Historial", 21, true)); gap()
@@ -178,6 +247,7 @@ class MainActivity : Activity() {
     }
     private fun profile() {
         box().apply { addView(label("María Pérez", 25, true)); addView(label("Apoderada ficticia · Usuario demo")); addView(label("Estudiante: Juan Pérez\nCiclo Preuniversitario")) }
+        button("Pruebas del dispositivo") { show("Pruebas del dispositivo") }
         button("Cerrar sesión") { datos.loggedIn = false; login() }
     }
     private fun admin() {
@@ -185,7 +255,7 @@ class MainActivity : Activity() {
         content.addView(label("Los cambios afectan únicamente los datos ficticios de este dispositivo.", 14))
         gap(); content.addView(label("Estado de asistencia", 18, true))
         val states = listOf("Presente", "Tardanza", "Inasistencia")
-        val spinner = Spinner(this).apply { adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, states); setSelection(states.indexOf(datos.todayStatus()).coerceAtLeast(0)) }
+        val spinner = Spinner(this).apply { tag = "attendance"; contentDescription = "Estado de asistencia"; adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, states); setSelection(states.indexOf(datos.todayStatus()).coerceAtLeast(0)) }
         content.addView(spinner, LinearLayout.LayoutParams(-1, dp(56)))
         button("Guardar asistencia") { datos.saveAttendance(spinner.selectedItem.toString()); toast("Asistencia guardada") }
         button("Generar aviso de asistencia") {
@@ -194,16 +264,18 @@ class MainActivity : Activity() {
         }
         gap(); content.addView(label("Editar obligación", 20, true))
         val obligation = datos.obligation()
-        val amount = input("Importe en soles", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL).apply { setText(BigDecimal.valueOf(obligation.amount, 2).toPlainString()) }
-        val due = input("Vencimiento: AAAA-MM-DD").apply { setText(obligation.due.toString()) }
-        val paid = CheckBox(this).apply { text = "Obligación pagada"; isChecked = obligation.paid }
+        content.addView(label("Importe en soles", 14, true))
+        val amount = input("Importe en soles", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL).apply { tag = "amount"; setText(BigDecimal.valueOf(obligation.amount, 2).toPlainString()) }
+        content.addView(label("Vencimiento (AAAA-MM-DD)", 14, true))
+        val due = input("Vencimiento: AAAA-MM-DD").apply { tag = "due"; setText(obligation.due.toString()) }
+        val paid = CheckBox(this).apply { tag = "paid"; setText(R.string.obligacion_pagada); isChecked = obligation.paid }
         content.addView(paid)
         button("Guardar obligación") {
             try {
                 val cents = BigDecimal(amount.text.toString().replace(',', '.')).setScale(2, RoundingMode.UNNECESSARY).movePointRight(2).longValueExact()
                 val date = LocalDate.parse(due.text.toString().trim())
                 datos.saveObligation(cents, date, paid.isChecked); toast("Obligación guardada")
-            } catch (_: Exception) { toast("Revisa el importe (máximo dos decimales, no negativo) y la fecha AAAA-MM-DD.") }
+            } catch (_: Exception) { detail("Revisa los datos", "Ingresa un importe entre 0 y 999,999.99, con máximo dos decimales, y una fecha válida en formato AAAA-MM-DD.") }
         }
         gap()
         button("Restablecer datos de demostración") {
@@ -219,8 +291,8 @@ class MainActivity : Activity() {
         }
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel("demo", "Avisos de demostración", NotificationManager.IMPORTANCE_DEFAULT))
-        val intent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).putExtra("openNotices", true), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        manager.notify(notice.id.hashCode(), Notification.Builder(this, "demo").setSmallIcon(android.R.drawable.ic_dialog_info)
+        val intent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).putExtra("openNotices", true).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        manager.notify(notice.id.hashCode(), Notification.Builder(this, "demo").setSmallIcon(R.drawable.ic_aviso)
             .setContentTitle(notice.title).setContentText(notice.body).setContentIntent(intent).setAutoCancel(true).build())
     }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -232,6 +304,10 @@ class MainActivity : Activity() {
             else toast("El aviso permanece en el historial aunque las notificaciones estén desactivadas.")
         }
     }
-    @Deprecated("Back clásico compatible con la primera versión")
-    override fun onBackPressed() { if (datos.loggedIn && screen != "Inicio") show("Inicio") else super.onBackPressed() }
+    private fun volver() {
+        if (datos.loggedIn && screen != "Inicio") show("Inicio") else finish()
+    }
+    @Deprecated("Se usa en Android 8 a 12")
+    @SuppressLint("GestureBackNavigation") // Android 13 o superior usa el callback registrado en onCreate.
+    override fun onBackPressed() { volver() }
 }

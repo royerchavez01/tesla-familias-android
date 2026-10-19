@@ -50,7 +50,7 @@ class DatosDemo(context: Context) {
     )
 
     fun saveObligation(amount: Long, due: LocalDate, paid: Boolean) {
-        require(amount >= 0)
+        require(amount in 0..99999999L)
         prefs.edit().putLong("amount", amount).putString("due", due.toString()).putBoolean("paid", paid).apply()
     }
 

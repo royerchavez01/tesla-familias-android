@@ -5,3 +5,5 @@
 local.properties
 .tools/
 *.iml
+entrega/*.zip
+!entrega/Entrega-TeslaFamilias-M8.zip

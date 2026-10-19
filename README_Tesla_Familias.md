@@ -1,181 +1,229 @@
 # Tesla Familias
 
-## Avance del proyecto — Módulo 5
+## Entrega final — Módulo 8
 
 **Autor:** Royer Alexander Chavez Malaver
 
 **Curso:** Desarrollo de Aplicaciones Móviles
 
+**Versión:** 1.0.0
+
 **Fecha:** 18 de octubre de 2026
 
-**Estado:** Primera versión Android con datos de demostración. La revisión en dispositivo está pendiente.
+## Descripción del proyecto
 
-## Descripción y problema
+Tesla Familias es una aplicación Android para padres o apoderados de estudiantes de la Academia Preuniversitaria Tesla. Permite consultar asistencias, obligaciones económicas y avisos desde el teléfono.
 
-Tesla Familias es una aplicación Android dirigida a padres o apoderados de la Academia Preuniversitaria Tesla. Busca reunir la información de asistencia, obligaciones económicas y avisos del estudiante en un solo lugar.
+Con este proyecto busco reunir la información que el padre necesita revisar sobre su hijo, sin tener que consultar distintas secciones de una plataforma web o esperar una comunicación de la academia. La aplicación está relacionada con SIGAF, el sistema web en el que también estoy trabajando. Para esta entrega desarrollé una demostración local con un estudiante ficticio, de modo que las funciones se puedan probar sin una cuenta institucional ni un servidor.
 
-Para conocer las novedades de su hijo, el padre puede necesitar revisar una plataforma web o esperar una comunicación de la academia. Con esta aplicación busco facilitar la consulta desde el teléfono y reunir los datos más importantes en una misma pantalla.
-
-Tesla Familias está relacionado con SIGAF, el sistema web en el que también estoy trabajando para la academia. En esta primera versión usaré datos ficticios guardados en el teléfono. Así podré desarrollar y probar las funciones principales antes de conectar la aplicación con el sistema real.
+El resultado es un producto mínimo viable (MVP) instalable. Incluye las consultas, un historial de avisos y un administrador de demostración para modificar los datos y comprobar los cambios dentro de la aplicación.
 
 ## Objetivos
 
-El objetivo general es desarrollar una aplicación sencilla que permita consultar información de un estudiante y demostrar los flujos principales sin depender de un servidor.
+El objetivo general fue desarrollar una aplicación Android que permita consultar información de un estudiante mediante una interfaz sencilla.
 
-Los objetivos específicos son:
+Los objetivos específicos fueron:
 
-- Mostrar asistencias, tardanzas e inasistencias.
-- Consultar obligaciones pendientes sin procesar pagos.
-- Consultar avisos y distinguir cuáles se han leído.
-- Guardar la sesión y los cambios de la demostración.
-- Incluir un panel de prueba para modificar datos y comprobar los resultados.
+- Consultar presencias, tardanzas e inasistencias.
+- Mostrar obligaciones económicas y su estado, sin procesar pagos.
+- Conservar los avisos y distinguir los leídos de los pendientes.
+- Guardar la sesión y los cambios en el teléfono.
+- Generar una notificación local de prueba.
+- Permitir restablecer los datos para repetir la demostración.
 
-## Decisiones de desarrollo
+## Funciones de la aplicación
 
-La documentación de Android recomienda separar las responsabilidades de la interfaz y los datos (Android Developers, 2026c). En esta primera versión, `MainActivity.kt` contiene las pantallas y `DatosDemo.kt` guarda y consulta los registros. Esta separación básica permite que Inicio y Asistencias utilicen la misma información sin repetir los registros en cada pantalla. Por ahora mantengo esta organización para trabajar las pantallas y los datos por separado.
-
-La guía de la capa de datos explica la importancia de centralizar las consultas y modificaciones (Android Developers, 2026b). Para guardar los datos uso SharedPreferences y registros JSON. Elegí esta opción porque la demostración solo maneja un estudiante y una obligación. Si el proyecto crece, será necesario revisar el almacenamiento y considerar una base de datos.
-
-Android permite mostrar notificaciones cuando la aplicación no está abierta (Android Developers, 2026a). El proyecto incluye avisos locales generados desde el panel de prueba. El historial se guarda dentro de la aplicación, por lo que su contenido no depende de que el aviso permanezca en la barra del teléfono. Esto no equivale a recibir avisos enviados desde la academia: esa comunicación requiere una integración remota que todavía no existe.
-
-El modo local permite probar la aplicación sin una cuenta real ni conexión a SIGAF. Por ahora los cambios solo se guardan en el teléfono donde se utiliza la demostración. Más adelante será necesario trabajar la conexión con el servidor para compartir la información entre la academia y los padres.
-
-## Alcance y avance actual
-
-| Pantalla o función | Avance |
+| Pantalla | Funciones |
 |---|---|
-| Acceso | Entrada demo y validación de usuario y contraseña de prueba |
-| Inicio | Estudiante, asistencia del día, total pendiente y avisos sin leer |
-| Asistencias | Historial y detalle de cada registro |
-| Obligaciones | Importe, vencimiento, estado y detalle informativo |
-| Notificaciones | Historial, detalle y marcado de lectura |
-| Perfil | Datos ficticios del apoderado y estudiante; cierre de sesión |
-| Administrador demo | Cambio de asistencia, edición de obligación, aviso de prueba y restablecimiento confirmado |
-| Almacenamiento | Sesión y registros guardados localmente |
-| Notificación del teléfono | Código incorporado; comprobación en dispositivo pendiente |
+| Acceso | Validación de credenciales de prueba y entrada directa al modo demo |
+| Inicio | Estudiante, asistencia del día, total pendiente y cantidad de avisos sin leer |
+| Asistencias | Historial con fecha, día, estado y detalle |
+| Obligaciones | Importe, vencimiento, estado y total pendiente; una cuota pagada no se suma al total |
+| Notificaciones | Historial, fecha y hora, detalle y marcado de lectura |
+| Perfil | Datos del apoderado y estudiante; cierre de sesión |
+| Administrador demo | Cambio de asistencia, edición de obligación, aviso local y restablecimiento |
 
-Esta es una primera implementación. El APK de desarrollo compiló correctamente el 13 de octubre de 2026 con Java 25, Gradle 9.6 y el plugin Android 9.4.1. Todavía me falta revisar las pantallas y probar las funciones en un teléfono o emulador.
+La sesión y los registros permanecen guardados al cerrar la aplicación. El botón de regreso permite volver a Inicio. Al tocar una notificación del teléfono se abre el historial; si la sesión está cerrada, primero se solicita el acceso.
 
-Quedan fuera del MVP los pagos en línea, chat, calificaciones, matrícula, geolocalización, biometría y administración real de usuarios. No se usarán datos reales de estudiantes.
+El conjunto inicial contiene a Juan Pérez, cinco registros de asistencia, una obligación de S/ 250.00 y dos avisos. Las fechas se calculan al preparar o restablecer la demostración. Si después no hay registro para el día actual, Inicio muestra “Sin registro”.
 
-## Diseños de las pantallas
+## Instalación y acceso
 
-Las imágenes siguientes son maquetas del proyecto. La primera interfaz utiliza tarjetas y los colores azul y blanco de estos diseños, pero todavía no reproduce el logotipo ni todos los elementos decorativos.
+1. Descargar `TeslaFamilias-1.0.0.apk`, incluido en el paquete de entrega y en la carpeta `entrega` del proyecto.
+2. Copiarlo al teléfono y abrirlo. Si Android lo solicita, permitir la instalación desde la aplicación utilizada para abrir el archivo.
+3. Instalar **Tesla Familias** y abrirla.
+4. Pulsar **Acceso de demostración** o utilizar estas credenciales:
 
-### Figura 1. Acceso
+   - **Usuario:** `demo`
+   - **Contraseña:** `tesla123`
 
-<img src="wireframes/wireframe_1.png" alt="Diseño de acceso a Tesla Familias" width="300">
+5. Para ver un aviso en la barra del teléfono, permitir las notificaciones cuando Android lo solicite.
 
-**Nota.** Maqueta del proyecto. Presenta usuario, contraseña y acceso demo. La implementación permite entrar con datos de prueba y muestra un mensaje si el acceso es incorrecto.
+La aplicación está configurada para Android 8.0 o superior. La comprobación de esta entrega se realizó en un emulador Pixel 8 con Android 17 (API 37). No necesita Internet durante la demostración. El APK utiliza la firma de desarrollo de Android y se entrega para instalación y evaluación académica.
 
-### Figura 2. Inicio
+## Recorrido para probarla
 
-<img src="wireframes/wireframe_2.png" alt="Diseño de Inicio con resumen del estudiante" width="300">
+1. Entrar a la demostración y consultar Asistencias, Obligaciones y Notificaciones.
+2. Abrir un aviso, volver a Inicio y comprobar que disminuyó la cantidad de avisos sin leer.
+3. Desplazarse hacia abajo en Inicio y abrir **Administrador de demostración**.
+4. Cambiar la asistencia, pulsar **Guardar asistencia** y volver a Inicio para revisar el resultado.
+5. En el administrador, editar el importe y el vencimiento de la obligación. La fecha se escribe en formato `AAAA-MM-DD`. Guardar y consultar Obligaciones.
+6. Marcar la obligación como pagada y comprobar que el total pendiente pasa a S/ 0.00.
+7. Pulsar **Generar aviso de asistencia**. Abrir el aviso desde la barra del teléfono y comprobar que también aparece en el historial.
+8. Cerrar y abrir la aplicación para revisar que se conserven los datos.
+9. Utilizar **Restablecer datos de demostración** para recuperar los valores iniciales. Esta acción pide confirmación.
+10. Abrir Perfil y cerrar sesión.
 
-**Nota.** Maqueta del proyecto. Reúne el resumen y los accesos principales. En la implementación, asistencia y contador de avisos se consultan desde los mismos datos locales.
+## Pruebas del dispositivo
 
-### Figura 3. Asistencias
+Desde Perfil se puede abrir un apartado independiente para comprobar componentes del teléfono. No modifica asistencias, obligaciones ni avisos.
 
-<img src="wireframes/wireframe_3.png" alt="Diseño del historial de asistencias" width="300">
+- **Sonido:** un botón reproduce un tono breve. Su audibilidad depende del volumen de notificaciones.
+- **Canvas:** un lienzo permite mover un punto al tocarlo o arrastrarlo.
+- **Sensor:** se muestra el valor del sensor de proximidad. Si no está disponible, se informa sin bloquear la aplicación.
 
-**Nota.** Maqueta del proyecto. Distingue presencia, tardanza e inasistencia mediante texto y color. La primera versión muestra fechas completas y un detalle sencillo.
+La imagen de la aplicación aparece en Acceso. Las listas organizan los registros y los estados de asistencia. Los clics y los cambios del sensor se atienden mediante eventos de Kotlin, con argumentos como las coordenadas del toque o el valor recibido. Este apartado permite demostrar esos componentes por separado de las funciones principales.
 
-### Figura 4. Obligaciones
+## Desarrollo y organización del código
 
-<img src="wireframes/wireframe_4.png" alt="Diseño de obligaciones económicas" width="300">
+El proyecto está escrito en Kotlin con Android Studio. La interfaz utiliza componentes nativos de Android, tarjetas y desplazamiento vertical. Mantuve la paleta azul y blanca de los diseños iniciales y adapté la navegación a las funciones de la demostración.
 
-**Nota.** Maqueta del proyecto. Muestra una cuota y el total pendiente. En el código, una obligación pagada deja de sumarse al total pendiente.
+La documentación de Android recomienda separar las responsabilidades de la interfaz y los datos (Android Developers, 2026c). Por eso organicé las pantallas en `MainActivity.kt` y el guardado de registros en `DatosDemo.kt`. Esta separación permite consultar la misma asistencia desde Inicio y desde el historial.
 
-### Figura 5. Notificaciones
+La guía de la capa de datos también explica la importancia de centralizar las consultas y las modificaciones (Android Developers, 2026b). Para este proyecto utilicé SharedPreferences y registros JSON, porque la demostración maneja pocos datos. Si se incorporan varios estudiantes o consultas más complejas, sería necesario revisar esta decisión y usar una base de datos.
 
-<img src="wireframes/wireframe_5.png" alt="Diseño del historial de avisos" width="300">
-
-**Nota.** Maqueta del proyecto. Presenta avisos de asistencia y vencimiento. La implementación permite abrirlos y guardarlos como leídos.
-
-### Figura 6. Administrador de demostración
-
-<img src="wireframes/wireframe_6.png" alt="Diseño del administrador de prueba" width="300">
-
-**Nota.** Maqueta del proyecto. Incluye cambio de asistencia, aviso y restablecimiento. La implementación añade la edición de la obligación, que todavía no aparece en esta imagen.
-
-### Pendientes del diseño
-
-Las maquetas de Inicio y Notificaciones muestran una presencia y una tardanza para el mismo día. En los datos iniciales de la aplicación se usa una tardanza para mantener la coherencia. Las imágenes originales aún deben ajustarse.
-
-Falta una maqueta de Perfil, aunque la pantalla básica ya está incorporada. También se debe uniformar la navegación y comprobar tamaños, desplazamiento y legibilidad en un teléfono.
-
-## Organización del código
+Las notificaciones permiten presentar información fuera de la pantalla de la aplicación (Android Developers, 2026a). En Tesla Familias el aviso se genera localmente y su registro se guarda por separado. De esta manera, abrir o retirar el aviso de la barra del teléfono no elimina el historial de la aplicación.
 
 ```text
 app/src/main/
   AndroidManifest.xml
   java/pe/tesla/familias/
-    MainActivity.kt   → pantallas y acciones de los botones
-    DatosDemo.kt      → consulta y guardado de datos ficticios
-  res/values/
-    styles.xml       → tema de la aplicación
+    MainActivity.kt       Pantallas y acciones de los botones
+    DatosDemo.kt          Consulta y guardado de los datos
+    PruebasDispositivoView.kt Sonido, lienzo táctil y lectura del sensor
+  res/
+    drawable/            Iconos de la aplicación y los avisos
+    values/              Tema y textos de recursos
+capturas/                Capturas de la aplicación funcionando
+wireframes/              Diseños iniciales
+entrega/                 APK y paquete final
 ```
 
-La navegación parte de Acceso hacia Inicio. Desde Inicio se abren Asistencias, Obligaciones, Notificaciones, Perfil y Administrador demo. El cierre de sesión regresa a Acceso.
+### Abrir el código y compilar
 
-La demostración contiene un estudiante, cinco registros iniciales de asistencia, una obligación y dos avisos. El administrador modifica la asistencia del día y la obligación. Restablecer recupera los datos iniciales después de confirmar la acción.
+1. Extraer el ZIP completo y abrir su carpeta raíz en Android Studio.
+2. Utilizar Java 25 como JDK de Gradle y sincronizar el proyecto.
+3. Instalar Android SDK 36, extensión 19, y Build Tools 36.0.0 si Android Studio los solicita.
+4. Seleccionar el módulo `app` y ejecutar en un emulador o teléfono.
 
-## Cómo ejecutar el avance
+El proyecto utiliza Gradle 9.6 y el plugin Android 9.4.1. La primera sincronización necesita Internet para descargar dependencias. Las rutas locales del SDK se configuran en Android Studio y no forman parte del código entregado.
 
-El proyecto está escrito en Kotlin y utiliza el plugin Android 9.4.1 y Gradle 9.6. La compilación se realizó con Java 25.
-
-1. Abrir la carpeta raíz en Android Studio y sincronizar Gradle.
-2. Instalar Android SDK 36, extensión 19, y Build Tools 36.0.0 si se solicitan.
-3. Seleccionar un emulador o dispositivo Android 8.0 o superior y ejecutar el módulo `app`.
-4. Pulsar **Acceso de demostración** o usar `demo` como usuario y `tesla123` como contraseña.
-
-Para compilar desde PowerShell con Java configurado:
+Desde PowerShell, con Java configurado, se puede ejecutar:
 
 ```powershell
 .\gradlew.bat :app:assembleDebug
 ```
 
-El APK de desarrollo se genera en `app/build/outputs/apk/debug/app-debug.apk` si la compilación termina correctamente. La aplicación no necesita conexión a SIGAF; la primera descarga de dependencias sí necesita Internet.
+El APK generado queda en `app/build/outputs/apk/debug/app-debug.apk`. Para ejecutar la revisión de Android:
 
-## Comprobaciones previstas
+```powershell
+.\gradlew.bat :app:lintDebug
+```
 
-Se revisará manualmente que el acceso funcione, que un cambio de asistencia aparezca en Inicio, que editar la obligación actualice el total y que abrir un aviso reduzca los no leídos. También se comprobará que los datos permanezcan al cerrar y abrir la aplicación, que el cierre de sesión funcione y que restablecer recupere la demostración.
+## Capturas de la versión final
 
-También revisaré las notificaciones y la apariencia en un teléfono o emulador. Después agregaré capturas de la aplicación y anotaré los errores que encuentre y sus correcciones.
+Las siguientes imágenes corresponden a la aplicación ejecutada en el emulador. Los diseños iniciales se conservan por separado en la carpeta [wireframes](wireframes).
+
+| Figura | Pantalla | Captura |
+|---|---|---|
+| 1 | Acceso | [Abrir](capturas/01-acceso.png) |
+| 2 | Inicio | [Abrir](capturas/02-inicio.png) |
+| 3 | Asistencias | [Abrir](capturas/03-asistencias.png) |
+| 4 | Obligaciones | [Abrir](capturas/04-obligaciones.png) |
+| 5 | Notificaciones | [Abrir](capturas/05-notificaciones.png) |
+| 6 | Perfil | [Abrir](capturas/06-perfil.png) |
+| 7 | Administrador demo | [Abrir](capturas/07-administrador.png) |
+| 8 | Aviso en Android | [Abrir](capturas/08-aviso-android.png) |
+| 9 | Pruebas del dispositivo | [Abrir](capturas/09-pruebas-dispositivo.png) |
+
+<img src="capturas/01-acceso.png" alt="Figura 1. Pantalla de acceso" width="240"> <img src="capturas/02-inicio.png" alt="Figura 2. Pantalla de Inicio" width="240"> <img src="capturas/05-notificaciones.png" alt="Figura 5. Historial de avisos" width="240">
+
+**Nota.** Capturas de Tesla Familias 1.0.0 en el emulador Pixel 8. Los nombres y registros son ficticios.
+
+## Comprobaciones realizadas
+
+Se realizó un recorrido de la aplicación en el emulador Pixel 8 con Android 17 el 18 de octubre de 2026.
+
+| Comprobación | Resultado observado |
+|---|---|
+| Instalación del APK | Instalación e inicio correctos |
+| Acceso sin credenciales | Muestra el error y conserva la pantalla de acceso |
+| Acceso de demostración | Abre Inicio con el estudiante ficticio |
+| Consultas | Abren Asistencias, Obligaciones, Notificaciones y Perfil |
+| Lectura de avisos | Al abrir un aviso, los no leídos cambian de 2 a 1 |
+| Regreso del sistema | Desde una sección vuelve a Inicio |
+| Cambio de asistencia | Se guardó Presente y apareció en Inicio |
+| Edición de obligación | Se guardaron S/ 123.45 y el estado Pagada; el total quedó en S/ 0.00 |
+| Persistencia | Los datos editados y la sesión se conservaron tras reinstalar y reiniciar la aplicación |
+| Notificación local | Al autorizar el permiso apareció el aviso en Android |
+| Apertura del aviso del sistema | Abrió el historial y conservó el registro dentro de la aplicación |
+| Restablecimiento | Permitió cancelar; al confirmar recuperó Tardanza, S/ 250.00 y los dos avisos iniciales |
+| Importe vacío | Mostró un mensaje de validación sin guardar el dato |
+| Cierre de sesión | Regresó a Acceso |
+| Compilación y revisión Android | APK generado y lint sin errores |
+| Pruebas del dispositivo | Botón de sonido ejecutado sin errores; punto del lienzo responde al toque y sensor muestra valores de proximidad |
+
+Estas comprobaciones corresponden al emulador indicado. No se ha evaluado el uso con familias reales ni la compatibilidad en todos los modelos de teléfono.
 
 ## Registro de cambios
 
-### Pasados — Borrador inicial
+### Borrador inicial
 
-En el primer borrador definí el problema, los objetivos, la plataforma Android y las funciones que tendrá la aplicación. También planteé las pantallas principales y el uso de datos locales para la demostración.
+Se definieron el problema, los objetivos, las pantallas y el alcance de la aplicación. Se prepararon seis maquetas y se planteó utilizar datos locales para la demostración.
 
-### Actuales — Módulo 5
+### Avance del módulo 5
 
-- Se actualizó el README con objetivos, justificación y referencias.
-- Se incorporaron las seis maquetas y sus pendientes.
-- Se creó el proyecto Android y una primera interfaz en Kotlin.
-- Se añadieron acceso demo, consultas, perfil y administrador de prueba.
-- Se incorporó almacenamiento local y código para notificaciones de demostración.
-- Se definieron las comprobaciones y los pendientes para la entrega final.
+Se creó el proyecto Android y la primera implementación en Kotlin. Se incorporaron acceso demo, consultas, Perfil, administrador de prueba y almacenamiento local. El README se actualizó con los diseños, las decisiones de desarrollo y los pendientes.
 
-### Pendientes para la versión final
+### Versión final 1.0.0 — Módulo 8
 
-- Probar los recorridos principales en un teléfono o emulador.
-- Ajustar la apariencia y la navegación de las pantallas tomando como referencia las maquetas.
-- Comprobar que la sesión y los cambios se conserven al cerrar y abrir la aplicación.
-- Revisar las notificaciones del teléfono y corregir los errores encontrados.
-- Agregar capturas reales y actualizar las instrucciones de instalación y uso.
-- Generar el APK final con las correcciones realizadas.
+- Se mejoró Inicio con tarjetas de navegación y resúmenes.
+- Se incorporaron iconos de la aplicación y las notificaciones.
+- Se ajustaron los márgenes para las barras del teléfono y el teclado.
+- Se completó el regreso del sistema y la apertura del historial desde las notificaciones.
+- Se conservan los datos del formulario del administrador al recrear la pantalla.
+- Se limitó el importe y se mejoró el mensaje de validación.
+- Se comprobó el funcionamiento en el emulador y se agregaron capturas reales.
+- Se generó el APK 1.0.0 y se preparó el paquete con código e instrucciones.
+- Se prepararon el informe, la presentación y el portafolio con QR de descarga.
+- Se añadió un apartado independiente para comprobar sonido, lienzo táctil y sensor de proximidad.
 
-La conexión con SIGAF y el envío de notificaciones remotas quedan como mejoras posteriores al alcance de esta entrega.
+### Mejoras posteriores
+
+Conectar la aplicación con SIGAF, incorporar autenticación institucional, consultar varios estudiantes y recibir notificaciones remotas. Estas funciones requieren un backend y quedan fuera de la demostración local entregada.
+
+## Alcance y conclusión
+
+La versión final permite recorrer las funciones previstas del MVP sin depender de servicios externos. El panel de demostración facilita modificar la información y revisar su efecto desde las consultas del apoderado.
+
+La aplicación no procesa pagos, no envía información entre dispositivos y no administra cuentas reales. El acceso demo tampoco representa un sistema de autenticación institucional. Antes de utilizarla con datos reales sería necesario desarrollar esa integración y revisar el tratamiento de la información de los estudiantes.
+
+## Reflexión
+
+La revisión del proyecto muestra que terminar las pantallas es solo una parte del trabajo. La asistencia debe coincidir en Inicio y en el historial, y una obligación pagada debe reflejarse en el total pendiente. Guardar los datos por separado de las pantallas ayudó a mantener esa coherencia. También fue importante distinguir el historial de avisos de la notificación que aparece en el teléfono. Para continuar, priorizaría conectar SIGAF y validar el uso con familias antes de ampliar las funciones.
+
+## Informe presentación y portafolio
+
+- [Informe del proyecto](entrega/documentos/Informe-Tesla-Familias-M8.docx)
+- [Presentación de nueve diapositivas](entrega/documentos/Presentacion-Tesla-Familias-M8.pptx)
+- [Portafolio y descargas](PORTAFOLIO.md)
+- [Paquete completo del proyecto](entrega/Entrega-TeslaFamilias-M8.zip)
 
 ## Repositorio
 
-[Código del proyecto](https://github.com/royerchavez01/tesla-familias-android)
-
-[README del proyecto](https://github.com/royerchavez01/tesla-familias-android/blob/main/README_Tesla_Familias.md)
-
-Para consultar las imágenes en una copia local, la carpeta `wireframes` debe estar junto a este archivo.
+- [Código del proyecto](https://github.com/royerchavez01/tesla-familias-android)
+- [README del proyecto](https://github.com/royerchavez01/tesla-familias-android/blob/main/README_Tesla_Familias.md)
+- [APK de evaluación](entrega/TeslaFamilias-1.0.0.apk)
 
 ## Referencias
 

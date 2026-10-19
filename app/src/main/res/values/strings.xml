@@ -1,0 +1,4 @@
+<resources>
+    <string name="error_acceso">Usa las credenciales de prueba: demo / tesla123.</string>
+    <string name="obligacion_pagada">Obligación pagada</string>
+</resources>
