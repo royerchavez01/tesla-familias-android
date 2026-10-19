@@ -215,9 +215,9 @@ La revisión del proyecto muestra que terminar las pantallas es solo una parte d
 ## Informe presentación y portafolio
 
 - [Informe del proyecto](entrega/documentos/Informe-Tesla-Familias-M8.docx)
-- [Presentación de nueve diapositivas](entrega/documentos/Presentacion-Tesla-Familias-M8.pptx)
+- [Presentación de nueve diapositivas](entrega/documentos/Royer_Chavez_Tesla-Familias.pptx)
 - [Portafolio y descargas](PORTAFOLIO.md)
-- [Paquete completo del proyecto](entrega/Entrega-TeslaFamilias-M8.zip)
+
 
 ## Repositorio
 
